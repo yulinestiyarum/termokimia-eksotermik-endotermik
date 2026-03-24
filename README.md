@@ -1,0 +1,1 @@
+# termokimia-eksotermik-endotermik
