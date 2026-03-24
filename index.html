@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab Maya Kimia – Reaksi Eksotermik dan Endotermik</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f7ff;--surf:#ffffff;--surf2:#f8fafc;
+  --border:#dde3ec;--border2:#c5cfe0;
+  --exo:#ea580c;--exo2:#f97316;--exo3:#fff7ed;
+  --endo:#2563eb;--endo2:#3b82f6;--endo3:#eff6ff;
+  --text:#0f172a;--text2:#475569;--text3:#94a3b8;
+  --green:#059669;--red:#dc2626;--yellow:#d97706;
+  --h:56px;--fbase:14px;
+}
+@media(max-width:768px){:root{--fbase:13px;--h:46px;}}
+@media(min-width:1200px){:root{--fbase:15px;}}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 10% 0%,rgba(234,88,12,0.05) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 50% at 90% 100%,rgba(37,99,235,0.05) 0%,transparent 60%),
+    repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(148,163,184,0.06) 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(148,163,184,0.06) 40px);
+}
+/* HEADER */
+header{
+  position:relative;z-index:10;height:var(--h);flex-shrink:0;
+  background:linear-gradient(135deg,#0f172a,#1a3a5c,#1e3a8a);
+  border-bottom:1px solid rgba(255,255,255,0.1);
+  display:flex;align-items:center;padding:0 14px;gap:12px;
+  box-shadow:0 2px 12px rgba(15,23,42,0.5);
+}
+.logo{display:flex;align-items:center;gap:9px;flex-shrink:0;}
+.logo-icon{width:36px;height:36px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+.logo-text{font-family:'Poppins',sans-serif;font-size:20px;font-weight:800;color:#fff;line-height:1.1;}
+.logo-sub{font-size:9px;color:rgba(255,255,255,0.65);font-family:'JetBrains Mono',monospace;letter-spacing:.05em;}
+nav{display:flex;gap:2px;flex:1;overflow-x:auto;}
+nav::-webkit-scrollbar{display:none;}
+.nb{position:relative;background:none;border:none;color:rgba(255,255,255,0.7);cursor:pointer;
+  font-family:'Nunito',sans-serif;font-size:clamp(11px,1.2vw,13.5px);font-weight:700;
+  padding:0 11px;height:var(--h);white-space:nowrap;transition:color .2s;display:flex;align-items:center;gap:5px;}
+.nb::after{content:'';position:absolute;bottom:0;left:8px;right:8px;height:2.5px;
+  background:linear-gradient(90deg,var(--exo2),var(--endo2));transform:scaleX(0);transition:transform .2s;border-radius:2px 2px 0 0;}
+.nb:hover{color:rgba(255,255,255,.95);}
+.nb.active{color:#fff;}
+.nb.active::after{transform:scaleX(1);}
+.nb-icon{font-size:16px;}
+#menuToggle{display:none;background:none;border:none;cursor:pointer;padding:6px;color:#fff;flex-shrink:0;}
+#menuToggle svg{display:block;}
+@media(max-width:640px){
+  header{flex-wrap:nowrap;padding:0 10px;}
+  .logo-text{font-size:15px;}
+  .logo-sub{display:none;}
+  #menuToggle{display:flex;align-items:center;margin-left:auto;}
+  nav{display:none;flex-direction:column;position:fixed;top:var(--h);right:0;left:0;z-index:999;
+    background:linear-gradient(180deg,#0f172a,#1a3a5c);border-bottom:1px solid rgba(255,255,255,.15);
+    box-shadow:0 8px 24px rgba(0,0,0,.35);overflow:visible;gap:0;flex:none;}
+  nav.open{display:flex;}
+  .nb{height:50px;width:100%;text-align:left;padding:0 18px;border-bottom:1px solid rgba(255,255,255,.07);
+    font-size:14px;display:flex;align-items:center;gap:10px;}
+  .nb::after{display:none;}
+  .nb.active{background:rgba(255,255,255,.08);}
+}
+#app{position:relative;z-index:1;flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.page{display:none;flex:1;overflow:hidden;}
+.page.active{display:flex;flex-direction:column;}
+@keyframes fu{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.page.active{animation:fu .25s ease;}
+.scroll{flex:1;overflow-y:auto;padding:12px 16px 16px;}
+.scroll::-webkit-scrollbar{width:4px;}
+.scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* CARDS */
+.card{background:var(--surf);border:1px solid var(--border);border-radius:10px;
+  padding:13px 15px;margin-bottom:8px;transition:border-color .2s,box-shadow .2s;
+  box-shadow:0 1px 4px rgba(30,41,59,0.06);}
+.card:hover{border-color:var(--border2);box-shadow:0 3px 12px rgba(30,41,59,0.09);}
+.ch{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.ci{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.ci.exo{background:rgba(234,88,12,.12);}
+.ci.endo{background:rgba(37,99,235,.12);}
+.ci.b{background:rgba(22,163,74,.1);}
+.ci.g{background:rgba(5,150,105,.1);}
+.ci.y{background:rgba(217,119,6,.1);}
+.ci.p{background:rgba(124,58,237,.1);}
+.ci.r{background:rgba(220,38,38,.1);}
+.ct{font-family:'Poppins',sans-serif;font-size:clamp(13px,1.4vw,15px);font-weight:700;color:var(--text);}
+.card p{font-size:clamp(12px,1.2vw,13.5px);line-height:1.75;color:var(--text2);margin-bottom:6px;}
+.card p:last-child{margin-bottom:0;}
+.card h4{font-size:clamp(10px,1vw,12px);font-weight:700;color:var(--exo);letter-spacing:.08em;text-transform:uppercase;margin:10px 0 5px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+@media(max-width:580px){.two-col{grid-template-columns:1fr;}}
+
+/* SAMPUL */
+#page-sampul{background:linear-gradient(160deg,#0f172a 0%,#1a3a5c 45%,#1e3a8a 100%);}
+.sampul-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:30px 20px;overflow-y:auto;}
+.sampul-img-wrap{position:relative;display:flex;align-items:center;justify-content:center;}
+.sampul-img{max-width:min(340px,80vw);max-height:240px;object-fit:contain;filter:drop-shadow(0 10px 40px rgba(37,99,235,.4));animation:floatAnim 4s ease-in-out infinite;}
+@keyframes floatAnim{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.sampul-badge{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;color:#60a5fa;text-transform:uppercase;text-align:center;}
+.sampul-title{font-family:'Poppins',sans-serif;font-size:clamp(22px,4vw,36px);font-weight:800;color:#fff;text-align:center;line-height:1.2;text-shadow:0 4px 24px rgba(37,99,235,.4);}
+.sampul-title span{background:linear-gradient(90deg,#f97316,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sampul-subtitle{font-size:clamp(13px,2vw,17px);color:#93c5fd;text-align:center;font-weight:600;}
+.sampul-desc{font-size:12px;color:rgba(255,255,255,0.55);text-align:center;max-width:400px;line-height:1.7;}
+.btn-mulai{background:linear-gradient(135deg,#ea580c,#f97316);color:#fff;border:none;border-radius:12px;
+  padding:13px 36px;font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;cursor:pointer;
+  box-shadow:0 6px 24px rgba(234,88,12,.45);transition:transform .2s,box-shadow .2s;letter-spacing:.02em;}
+.btn-mulai:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 10px 32px rgba(234,88,12,.55);}
+.sampul-pills{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.sampul-pill{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:20px;
+  padding:5px 14px;font-size:11px;color:#bfdbfe;font-weight:600;}
+
+/* TEORI */
+.formula-box{font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.2vw,12.5px);
+  background:linear-gradient(135deg,#fff7ed,#fef3c7);border-left:3px solid var(--exo);
+  border-radius:0 8px 8px 0;padding:8px 14px;color:#9a3412;margin:7px 0;}
+.formula-box.endo-box{background:linear-gradient(135deg,var(--endo3),#dbeafe);border-left-color:var(--endo);color:#1e3a8a;}
+.energy-diagram{position:relative;height:130px;background:var(--surf2);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:8px 0;}
+.ed-reactant,.ed-product,.ed-arrow{position:absolute;}
+.badge-exo{display:inline-block;background:linear-gradient(135deg,#fff7ed,#fed7aa);border:1px solid #fdba74;
+  color:#9a3412;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:.05em;}
+.badge-endo{display:inline-block;background:linear-gradient(135deg,var(--endo3),#bfdbfe);border:1px solid #93c5fd;
+  color:#1e3a8a;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:.05em;}
+
+/* ALAT & BAHAN */
+.ab-section-title{font-size:10px;font-weight:800;color:var(--exo);letter-spacing:.15em;text-transform:uppercase;margin:12px 0 8px;display:flex;align-items:center;gap:7px;}
+.ab-section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;}
+.item-card{background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:12px 10px;text-align:center;transition:all .2s;}
+.item-card:hover{border-color:var(--endo2);box-shadow:0 4px 14px rgba(37,99,235,.1);transform:translateY(-2px);}
+.item-card img{height:52px;object-fit:contain;display:block;margin:0 auto 8px;}
+.item-card .iname{font-size:11.5px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:3px;}
+.item-card .isub{font-size:10px;color:var(--text3);line-height:1.4;}
+.item-card.alat-card{background:linear-gradient(135deg,#fff7ed,#fef9f0);border-color:#fed7aa;}
+.item-card.alat-card:hover{border-color:var(--exo);}
+.item-card.bahan-card{background:linear-gradient(135deg,var(--endo3),#f0f7ff);border-color:#bfdbfe;}
+.item-card.bahan-card:hover{border-color:var(--endo);}
+
+/* PROSEDUR */
+.proc-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;flex-shrink:0;}
+.ptab{background:var(--surf2);border:1px solid var(--border);border-radius:7px;padding:5px 12px;
+  font-size:11px;font-weight:700;cursor:pointer;color:var(--text2);transition:all .17s;}
+.ptab.active{background:linear-gradient(135deg,var(--exo),var(--exo2));color:#fff;border-color:var(--exo);
+  box-shadow:0 2px 8px rgba(234,88,12,.3);}
+.ptab.endo-tab.active{background:linear-gradient(135deg,var(--endo),var(--endo2));border-color:var(--endo);
+  box-shadow:0 2px 8px rgba(37,99,235,.3);}
+.ptab:hover:not(.active){border-color:var(--border2);}
+.proc-content{display:none;}
+.proc-content.active{display:block;}
+.proc-title-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.proc-badge{padding:4px 12px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
+.steps{display:flex;flex-direction:column;gap:6px;}
+.step{display:flex;gap:10px;align-items:flex-start;background:var(--surf2);border:1px solid var(--border);
+  border-radius:8px;padding:8px 11px;transition:all .17s;}
+.step:hover{border-color:var(--endo2);background:#eff6ff;}
+.snum{min-width:22px;height:22px;border-radius:50%;background:rgba(37,99,235,.08);
+  border:1.5px solid rgba(37,99,235,.25);display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--endo);flex-shrink:0;}
+.step p{font-size:clamp(12px,1.2vw,13.5px);color:var(--text2);line-height:1.65;margin:0;}
+.chem-symbol{display:inline-flex;align-items:center;gap:4px;background:rgba(37,99,235,.08);
+  border:1px solid rgba(37,99,235,.2);border-radius:5px;padding:1px 7px;font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--endo);font-weight:600;white-space:nowrap;}
+.chem-symbol.exo-sym{background:rgba(234,88,12,.08);border-color:rgba(234,88,12,.2);color:var(--exo);}
+.chem-img-inline{height:18px;width:auto;vertical-align:middle;object-fit:contain;}
+.notebox{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:9px 13px;margin-top:8px;}
+.notebox .nt{font-size:9.5px;font-weight:800;color:var(--yellow);letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px;}
+.notebox p{font-size:clamp(11px,1.1vw,12.5px);color:#92400e;line-height:1.6;margin:0;}
+
+/* SIMULASI */
+.sim-exp-tabs{display:flex;gap:4px;flex-wrap:wrap;padding:0 0 8px;flex-shrink:0;}
+.sim-etab{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:5px 11px;
+  font-size:11px;font-weight:700;cursor:pointer;color:var(--text2);transition:all .17s;}
+.sim-etab.active{background:linear-gradient(135deg,#0f172a,#1a3a5c);color:#fff;border-color:#0f172a;
+  box-shadow:0 2px 10px rgba(15,23,42,.3);}
+.sim-etab:hover:not(.active){border-color:var(--endo2);}
+.sim-area{display:grid;grid-template-columns:240px 1fr;gap:10px;flex:1;min-height:0;overflow:hidden;}
+@media(max-width:700px){.sim-area{grid-template-columns:1fr;}}
+.mat-panel{background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:12px;
+  display:flex;flex-direction:column;gap:10px;overflow-y:auto;box-shadow:0 1px 4px rgba(30,41,59,.06);}
+.mat-panel h3{font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;color:var(--text);flex-shrink:0;}
+.mat-list{display:flex;flex-direction:column;gap:6px;}
+.mat-item{background:var(--surf2);border:1.5px solid var(--border);border-radius:8px;
+  padding:8px 10px;display:flex;align-items:center;gap:9px;cursor:grab;touch-action:none;
+  user-select:none;transition:all .18s;-webkit-tap-highlight-color:transparent;}
+.mat-item:hover{border-color:var(--endo2);background:#eff6ff;transform:translateX(2px);}
+.mat-item:active{cursor:grabbing;transform:scale(.97);}
+.mat-item.dropped{opacity:.4;cursor:not-allowed;filter:grayscale(.5);}
+.mat-item.touch-active{transform:scale(1.05);box-shadow:0 6px 20px rgba(37,99,235,.2);border-color:var(--endo2);z-index:10;}
+.mat-item img{height:36px;width:36px;object-fit:contain;flex-shrink:0;}
+.mat-item-info strong{display:block;font-size:12px;font-weight:700;color:var(--text);}
+.mat-item-info span{font-size:10.5px;color:var(--text3);}
+.mat-item-badge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;
+  background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);color:var(--endo);flex-shrink:0;}
+.mat-item-badge.dropped-badge{background:rgba(5,150,105,.08);border-color:rgba(5,150,105,.3);color:var(--green);}
+
+.vessel-panel{display:flex;flex-direction:column;gap:8px;overflow:hidden;}
+.vessel-card{background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:12px;
+  flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;box-shadow:0 1px 4px rgba(30,41,59,.06);}
+.vessel-card h3{font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;flex-shrink:0;}
+.vessel-main{display:flex;gap:16px;align-items:flex-start;flex:1;min-height:0;overflow:hidden;}
+.vessel-svg-wrap{display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;}
+.vessel-svg-wrap svg{height:clamp(200px,28vh,300px);width:auto;}
+
+/* Drop zone overlay on vessel */
+.vessel-drop-zone{position:absolute;inset:0;border-radius:8px;transition:background .2s;cursor:copy;}
+.vessel-drop-zone.drag-over{background:rgba(37,99,235,.12);outline:2px dashed var(--endo2);outline-offset:2px;}
+
+.reaction-info{flex:1;display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto;}
+.ri-status{border-radius:8px;padding:10px 12px;font-size:12px;font-weight:700;line-height:1.5;}
+.ri-status.idle{background:var(--surf2);border:1px solid var(--border);color:var(--text3);}
+.ri-status.running{background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1px solid #fed7aa;color:#9a3412;}
+.ri-status.complete-exo{background:linear-gradient(135deg,#fff7ed,#ffedd5);border:1px solid #fb923c;color:#7c2d12;}
+.ri-status.complete-endo{background:linear-gradient(135deg,var(--endo3),#dbeafe);border:1px solid #93c5fd;color:#1e3a8a;}
+.temp-display{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.temp-val{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;line-height:1;transition:color .4s;}
+.temp-val.temp-hot{color:var(--exo);}
+.temp-val.temp-cold{color:var(--endo);}
+.temp-val.temp-neutral{color:var(--text3);}
+.temp-label{font-size:10px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
+.temp-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:6px;}
+.temp-bar-fill{height:100%;border-radius:3px;transition:width .4s ease,background .4s ease;background:var(--text3);}
+.ri-obs{font-size:11.5px;color:var(--text2);line-height:1.65;}
+.ri-formula{font-family:'JetBrains Mono',monospace;font-size:10.5px;background:var(--surf2);
+  border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--endo);margin-top:4px;}
+.ri-badge-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+.ri-badge{padding:3px 9px;border-radius:12px;font-size:10px;font-weight:700;letter-spacing:.05em;}
+.ri-badge.exo{background:rgba(234,88,12,.1);border:1px solid rgba(234,88,12,.3);color:var(--exo);}
+.ri-badge.endo{background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.3);color:var(--endo);}
+.ri-badge.pos{background:rgba(5,150,105,.1);border:1px solid rgba(5,150,105,.3);color:var(--green);}
+.reset-btn{width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px;
+  font-family:'Nunito',sans-serif;font-size:11.5px;font-weight:700;cursor:pointer;
+  background:var(--surf2);color:var(--text2);transition:all .17s;}
+.reset-btn:hover{border-color:var(--endo);color:var(--endo);background:var(--endo3);}
+
+/* Dropped item badges inside vessel info */
+.dropped-badge-list{display:flex;flex-direction:column;gap:4px;margin-top:4px;}
+.db-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--green);font-weight:600;}
+.db-item::before{content:'✓';color:var(--green);font-weight:800;}
+
+/* Particles / Animation inside vessel */
+.particle{position:absolute;border-radius:50%;pointer-events:none;animation:particleRise linear infinite;}
+@keyframes particleRise{0%{transform:translateY(0) scale(1);opacity:.8;}100%{transform:translateY(-100px) scale(.3);opacity:0;}}
+@keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-4px);}40%{transform:translateX(4px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}}
+
+/* DISKUSI */
+.disc-q{margin-bottom:14px;}
+.disc-q-num{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--endo);letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px;}
+.disc-q-text{font-size:clamp(12px,1.2vw,13.5px);color:var(--text);font-weight:600;margin-bottom:6px;line-height:1.6;}
+.disc-textarea{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;
+  font-family:'Nunito',sans-serif;font-size:12.5px;color:var(--text);background:var(--surf2);
+  resize:vertical;outline:none;transition:border-color .17s;line-height:1.65;min-height:70px;}
+.disc-textarea:focus{border-color:var(--endo2);box-shadow:0 0 0 2.5px rgba(37,99,235,.12);}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;z-index:9000;
+  background:#0f172a;color:#fff;border-radius:10px;padding:10px 16px;font-size:12px;font-weight:600;
+  box-shadow:0 8px 24px rgba(0,0,0,.3);transform:translateY(80px);opacity:0;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .25s;pointer-events:none;
+  max-width:280px;line-height:1.5;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.toast-exo{background:linear-gradient(135deg,#7c2d12,var(--exo));}
+.toast.toast-endo{background:linear-gradient(135deg,#1e3a8a,var(--endo2));}
+
+/* LOADING SCREEN */
+#loadScreen{
+  position:fixed;inset:0;z-index:99999;
+  background:linear-gradient(160deg,#0f172a 0%,#1a3a5c 50%,#1e3a8a 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  transition:opacity .6s ease;
+}
+#loadScreen.hide{opacity:0;pointer-events:none;}
+.load-img{max-width:clamp(120px,25vw,200px);max-height:160px;object-fit:contain;margin-bottom:16px;
+  filter:drop-shadow(0 6px 24px rgba(234,88,12,.4));animation:floatAnim 3s ease-in-out infinite;}
+.load-title{font-family:'Poppins',sans-serif;font-size:clamp(20px,2.8vw,30px);font-weight:800;
+  color:#fff;text-align:center;margin-bottom:3px;text-shadow:0 2px 16px rgba(37,99,235,.3);}
+.load-sub{font-family:'JetBrains Mono',monospace;font-size:clamp(9px,1vw,11px);
+  color:#60a5fa;letter-spacing:.15em;text-transform:uppercase;text-align:center;margin-bottom:26px;}
+.load-bar-wrap{width:clamp(220px,30vw,340px);height:5px;background:rgba(255,255,255,.12);
+  border-radius:5px;overflow:hidden;margin-bottom:7px;}
+.load-bar-slide{height:100%;width:0%;background:linear-gradient(90deg,#f97316,#fbbf24,#ea580c);border-radius:5px;transition:width .1s linear;}
+.load-percent{font-family:'JetBrains Mono',monospace;font-size:clamp(12px,1.4vw,15px);
+  color:#fff;font-weight:700;margin-bottom:12px;text-align:center;letter-spacing:.06em;}
+.load-status{font-size:clamp(10px,1vw,12px);color:#bfdbfe;font-family:'Nunito',sans-serif;
+  margin-bottom:28px;min-height:16px;text-align:center;}
+#btnMulaiPraktikum{
+  display:none;background:linear-gradient(135deg,#ea580c,#f97316);
+  color:#fff;border:none;border-radius:12px;padding:12px 32px;
+  font-family:'Poppins',sans-serif;font-size:clamp(12px,1.3vw,15px);font-weight:700;
+  cursor:pointer;letter-spacing:.03em;
+  box-shadow:0 6px 24px rgba(234,88,12,.45);
+  animation:btnPop .4s cubic-bezier(.34,1.56,.64,1) forwards;
+  transition:transform .18s,box-shadow .18s;
+}
+#btnMulaiPraktikum:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 10px 32px rgba(234,88,12,.55);}
+@keyframes btnPop{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+
+/* Confetti celebration */
+.celeb-overlay{position:fixed;inset:0;z-index:20000;display:none;align-items:center;justify-content:center;pointer-events:none;background:rgba(15,23,42,.5);backdrop-filter:blur(4px);}
+.celeb-overlay.on{display:flex;pointer-events:auto;}
+.celeb-box{background:linear-gradient(145deg,#0a0f2e,#0f172a,#1a2a6e);border:1px solid rgba(99,179,237,.2);
+  border-radius:24px;padding:36px 44px;text-align:center;max-width:380px;width:92%;
+  box-shadow:0 24px 80px rgba(0,0,0,.6);position:relative;
+  transform:scale(.4) translateY(80px);opacity:0;transition:transform .55s cubic-bezier(.34,1.56,.64,1),opacity .4s;}
+.celeb-overlay.on .celeb-box{transform:scale(1) translateY(0);opacity:1;}
+.celeb-emoji{font-size:64px;line-height:1;margin-bottom:12px;animation:celebBounce .8s ease infinite;display:block;}
+.celeb-title{font-family:'Poppins',sans-serif;font-size:24px;font-weight:800;color:#fff;margin-bottom:8px;}
+.celeb-sub{font-size:13px;color:#93c5fd;line-height:1.65;margin-bottom:20px;}
+.celeb-btn{background:linear-gradient(135deg,#ea580c,#f97316);color:#fff;border:none;border-radius:10px;
+  padding:10px 28px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;
+  transition:transform .15s;box-shadow:0 4px 16px rgba(234,88,12,.4);}
+.celeb-btn:hover{transform:scale(1.04);}
+@keyframes celebBounce{0%,100%{transform:translateY(0) scale(1);}45%{transform:translateY(-12px) scale(1.07);}70%{transform:translateY(-3px) scale(.97);}}
+
+/* Touch drag clone */
+#touchDragClone{position:fixed;z-index:99998;pointer-events:none;opacity:.88;transform:scale(1.08);
+  box-shadow:0 10px 32px rgba(0,0,0,.3);border-radius:8px;display:none;}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<!-- LOADING / SAMPUL SCREEN -->
+<div id="loadScreen">
+  <img class="load-img" src="https://yulinestiyarum.github.io/termokimia/sampul.png" alt="Termokimia" onerror="this.style.display='none'">
+  <div class="load-title">Lab Maya Kimia</div>
+  <div class="load-sub">Reaksi Eksotermik &amp; Endotermik</div>
+  <div class="load-bar-wrap"><div class="load-bar-slide" id="loadBar"></div></div>
+  <div class="load-percent" id="loadPercent">0%</div>
+  <div class="load-status" id="loadStatus">Memuat laboratorium virtual…</div>
+  <button id="btnMulaiPraktikum" onclick="startPraktikum()">🔥 Mulai Praktikum</button>
+</div>
+<div id="touchDragClone"></div>
+
+<script>
+(function(){
+  const bar=document.getElementById('loadBar');
+  const pct=document.getElementById('loadPercent');
+  const status=document.getElementById('loadStatus');
+  const msgs=['Memuat laboratorium virtual…','Menyiapkan alat percobaan…','Memanaskan reagen…','Kalibrasi termometer…','Laboratorium siap!'];
+  let cur=0;const total=3200;const step=20;const inc=100/(total/step);let msgI=0;
+  const iv=setInterval(()=>{
+    cur=Math.min(100,cur+inc);const v=Math.floor(cur);
+    bar.style.width=v+'%';pct.textContent=v+'%';
+    if(v>0&&v%24===0&&msgI<msgs.length-1){msgI++;status.textContent=msgs[msgI];}
+    if(cur>=100){clearInterval(iv);pct.textContent='100%';status.textContent='✅ Laboratorium siap digunakan!';
+      document.getElementById('btnMulaiPraktikum').style.display='block';}
+  },step);
+})();
+function startPraktikum(){
+  SFX.success();
+  const ls=document.getElementById('loadScreen');
+  ls.classList.add('hide');
+  setTimeout(()=>{ls.style.display='none';},650);
+}
+</script>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🔥</div>
+    <div>
+      <div class="logo-text">Lab Maya Kimia</div>
+      <div class="logo-sub">Termokimia · SMA/MA</div>
+    </div>
+  </div>
+  <button id="menuToggle" onclick="toggleNav()" aria-label="Menu">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+      <line id="mL1" x1="3" y1="6" x2="21" y2="6"/><line id="mL2" x1="3" y1="12" x2="21" y2="12"/><line id="mL3" x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+  <nav id="mainNav">
+    <button class="nb active" onclick="show('sampul',this);closeNav()"><span class="nb-icon">🏠</span>Sampul</button>
+    <button class="nb" onclick="show('teori',this);closeNav()"><span class="nb-icon">📚</span>Teori</button>
+    <button class="nb" onclick="show('alatbahan',this);closeNav()"><span class="nb-icon">🔬</span>Alat &amp; Bahan</button>
+    <button class="nb" onclick="show('prosedur',this);closeNav()"><span class="nb-icon">📋</span>Prosedur</button>
+    <button class="nb" onclick="show('simulasi',this);closeNav()"><span class="nb-icon">⚗️</span>Simulasi</button>
+    <button class="nb" onclick="show('diskusi',this);closeNav()"><span class="nb-icon">💬</span>Diskusi</button>
+  </nav>
+</header>
+
+<div id="app">
+
+<!-- ============ SAMPUL ============ -->
+<div id="page-sampul" class="page active">
+  <div class="sampul-wrap">
+    <img class="sampul-img" src="https://yulinestiyarum.github.io/termokimia/sampul.png" alt="Termokimia" onerror="this.style.display='none'">
+    <div>
+      <div class="sampul-badge">🧪 Praktikum Kimia · SMA/MA</div>
+      <div style="height:10px;"></div>
+      <div class="sampul-title">Lab Maya Kimia<br><span>Termokimia</span></div>
+      <div style="height:10px;"></div>
+      <div class="sampul-subtitle">Reaksi Eksotermik dan Endotermik</div>
+    </div>
+    <div class="sampul-pills">
+      <div class="sampul-pill">🔥 6 Percobaan</div>
+      <div class="sampul-pill">🎮 Interaktif</div>
+      <div class="sampul-pill">📊 Animasi Reaksi</div>
+      <div class="sampul-pill">🌡️ Simulasi Suhu</div>
+    </div>
+    <div class="sampul-desc">Virtual laboratory ini dirancang untuk membantu memahami konsep reaksi eksotermik dan endotermik melalui simulasi percobaan yang interaktif dan menarik.</div>
+    <button class="btn-mulai" onclick="show('teori',document.querySelectorAll('.nb')[1]);SFX.start();">🚀 Mulai Belajar</button>
+  </div>
+</div>
+
+<!-- ============ TEORI ============ -->
+<div id="page-teori" class="page">
+  <div class="scroll" style="overflow-y:auto;padding:12px 16px 16px;">
+
+    <div class="two-col" style="margin-bottom:8px;">
+      <div class="card">
+        <div class="ch"><div class="ci b">🎯</div><div class="ct">Tujuan Percobaan</div></div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:5px;">
+          <li style="display:flex;gap:7px;align-items:flex-start;font-size:12.5px;color:var(--text2);line-height:1.6;"><span style="color:var(--exo);font-weight:800;flex-shrink:0;">›</span>Mengamati perbedaan reaksi eksotermik dan endotermik secara langsung.</li>
+          <li style="display:flex;gap:7px;align-items:flex-start;font-size:12.5px;color:var(--text2);line-height:1.6;"><span style="color:var(--exo);font-weight:800;flex-shrink:0;">›</span>Mengukur perubahan suhu menggunakan termometer.</li>
+          <li style="display:flex;gap:7px;align-items:flex-start;font-size:12.5px;color:var(--text2);line-height:1.6;"><span style="color:var(--exo);font-weight:800;flex-shrink:0;">›</span>Menentukan tanda ΔH berdasarkan arah perpindahan kalor.</li>
+          <li style="display:flex;gap:7px;align-items:flex-start;font-size:12.5px;color:var(--text2);line-height:1.6;"><span style="color:var(--exo);font-weight:800;flex-shrink:0;">›</span>Menggambarkan diagram tingkat energi reaksi.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ci g">🏆</div><div class="ct">Hasil Belajar</div></div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:5px;">
+          <li style="display:flex;gap:7px;align-items:flex-start;font-size:12.5px;color:var(--text2);line-height:1.6;"><span style="color:var(--green);font-weight:800;flex-shrink:0;">›</span>Membedakan reaksi eksotermik dan endotermik dari data suhu.</li>
+          <li style="display:flex;gap:7px;align-items:flex-start;font-size:12.5px;color:var(--text2);line-height:1.6;"><span style="color:var(--green);font-weight:800;flex-shrink:0;">›</span>Menganalisis perpindahan kalor sistem dan lingkungan.</li>
+          <li style="display:flex;gap:7px;align-items:flex-start;font-size:12.5px;color:var(--text2);line-height:1.6;"><span style="color:var(--green);font-weight:800;flex-shrink:0;">›</span>Menentukan tanda ΔH (positif/negatif).</li>
+          <li style="display:flex;gap:7px;align-items:flex-start;font-size:12.5px;color:var(--text2);line-height:1.6;"><span style="color:var(--green);font-weight:800;flex-shrink:0;">›</span>Menggunakan alat lab dengan aman dan tepat.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:8px;">
+      <div class="ch"><div class="ci b">📖</div><div class="ct">Dasar Teori</div></div>
+      <p><strong style="color:var(--text);">Termokimia</strong> merupakan cabang ilmu kimia yang mempelajari hubungan antara <strong>kalor (energi panas)</strong> dengan reaksi kimia atau proses fisika. Dalam termokimia dikenal konsep <em>sistem</em> (zat-zat yang direaksikan) dan <em>lingkungan</em> (segala sesuatu di luar sistem, termasuk tabung reaksi, termometer, dan udara sekitar).</p>
+      <p>Interaksi antara sistem dan lingkungan melibatkan perpindahan energi berupa kalor. Berdasarkan arah perpindahan kalor, reaksi kimia dibedakan menjadi dua jenis: <strong style="color:var(--exo)">reaksi eksotermik</strong> dan <strong style="color:var(--endo)">reaksi endotermik</strong>.</p>
+    </div>
+
+    <div class="two-col">
+      <!-- EKSOTERMIK -->
+      <div class="card" style="border-left:3px solid var(--exo);margin-bottom:0;">
+        <div class="ch"><div class="ci exo">🔥</div><div class="ct" style="color:var(--exo);">Reaksi Eksotermik</div></div>
+        <div class="badge-exo" style="margin-bottom:8px;">ΔH &lt; 0</div>
+        <p>Reaksi yang <strong>melepaskan kalor</strong> dari sistem ke lingkungan. Suhu campuran <strong>naik</strong> (T akhir &gt; T awal) karena energi dilepaskan.</p>
+        <h4 style="color:var(--exo);">Indikator Pengamatan</h4>
+        <p style="font-size:11.5px;">🌡️ Suhu meningkat &nbsp;|&nbsp; Wadah terasa <strong>panas</strong> &nbsp;|&nbsp; Entalpi produk &lt; reaktan</p>
+        <h4 style="color:var(--exo);">Diagram Energi</h4>
+        <div class="energy-diagram" style="border-color:#fed7aa;">
+          <svg viewBox="0 0 280 130" style="width:100%;height:100%;display:block;">
+            <line x1="20" y1="35" x2="90" y2="35" stroke="#ea580c" stroke-width="3" stroke-linecap="round"/>
+            <text x="20" y="28" font-size="10" fill="#9a3412" font-family="Nunito">Reaktan</text>
+            <line x1="90" y1="35" x2="200" y2="95" stroke="#ea580c" stroke-width="1.5" stroke-dasharray="5,3"/>
+            <line x1="200" y1="95" x2="260" y2="95" stroke="#ea580c" stroke-width="3" stroke-linecap="round"/>
+            <text x="200" y="112" font-size="10" fill="#9a3412" font-family="Nunito">Produk</text>
+            <text x="155" y="55" font-size="10" fill="#b45309" font-family="JetBrains Mono">ΔH &lt; 0</text>
+            <line x1="265" y1="35" x2="265" y2="95" stroke="#ea580c" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="268" y="68" font-size="9" fill="#ea580c" font-family="Nunito">kalor↓</text>
+          </svg>
+        </div>
+        <h4 style="color:var(--exo);">Contoh Reaksi (di luar percobaan)</h4>
+        <div class="formula-box">CH₄(g) + 2O₂(g) → CO₂(g) + 2H₂O(l) + kalor<br><span style="font-size:9px;opacity:.75;">Pembakaran gas metana, ΔH = −890 kJ/mol</span></div>
+        <div class="formula-box">Fe₂O₃(s) + CO(g) → 2Fe(s) + 3CO₂(g) + kalor<br><span style="font-size:9px;opacity:.75;">Reduksi oksida besi (proses pembuatan besi)</span></div>
+      </div>
+      <!-- ENDOTERMIK -->
+      <div class="card" style="border-left:3px solid var(--endo);margin-bottom:0;">
+        <div class="ch"><div class="ci endo">❄️</div><div class="ct" style="color:var(--endo);">Reaksi Endotermik</div></div>
+        <div class="badge-endo" style="margin-bottom:8px;">ΔH &gt; 0</div>
+        <p>Reaksi yang <strong>menyerap kalor</strong> dari lingkungan ke sistem. Suhu campuran <strong>turun</strong> (T akhir &lt; T awal) karena energi diserap.</p>
+        <h4 style="color:var(--endo);">Indikator Pengamatan</h4>
+        <p style="font-size:11.5px;">🌡️ Suhu menurun &nbsp;|&nbsp; Wadah terasa <strong>dingin</strong> &nbsp;|&nbsp; Entalpi produk &gt; reaktan</p>
+        <h4 style="color:var(--endo);">Diagram Energi</h4>
+        <div class="energy-diagram" style="border-color:#bfdbfe;">
+          <svg viewBox="0 0 280 130" style="width:100%;height:100%;display:block;">
+            <line x1="20" y1="95" x2="90" y2="95" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+            <text x="20" y="112" font-size="10" fill="#1e3a8a" font-family="Nunito">Reaktan</text>
+            <line x1="90" y1="95" x2="200" y2="35" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="5,3"/>
+            <line x1="200" y1="35" x2="260" y2="35" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+            <text x="200" y="28" font-size="10" fill="#1e3a8a" font-family="Nunito">Produk</text>
+            <text x="155" y="80" font-size="10" fill="#3b82f6" font-family="JetBrains Mono">ΔH &gt; 0</text>
+            <line x1="265" y1="35" x2="265" y2="95" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="268" y="68" font-size="9" fill="#2563eb" font-family="Nunito">kalor↑</text>
+          </svg>
+        </div>
+        <h4 style="color:var(--endo);">Contoh Reaksi (di luar percobaan)</h4>
+        <div class="formula-box endo-box">CaCO₃(s) → CaO(s) + CO₂(g) − kalor<br><span style="font-size:9px;opacity:.75;">Dekomposisi batu kapur, ΔH = +177 kJ/mol</span></div>
+        <div class="formula-box endo-box">6CO₂(g) + 6H₂O(l) → C₆H₁₂O₆(s) + 6O₂(g)<br><span style="font-size:9px;opacity:.75;">Fotosintesis tumbuhan (menyerap energi cahaya)</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============ ALAT & BAHAN ============ -->
+<div id="page-alatbahan" class="page">
+  <div class="scroll" style="overflow-y:auto;">
+    <div class="ab-section-title">⚙️ Alat Percobaan</div>
+    <div class="item-grid">
+      <div class="item-card alat-card">
+        <img src="https://yulinestiyarum.github.io/Gelas-Kimia/Gelas-Kimia.png" alt="Gelas Kimia" onerror="this.src=''">
+        <div class="iname">Gelas Kimia</div><div class="isub">Beaker Glass · wadah utama</div>
+      </div>
+      <div class="item-card alat-card">
+        <img src="https://yulinestiyarum.github.io/termokimia/tabungreaksi.png" alt="Tabung Reaksi" onerror="this.src=''">
+        <div class="iname">Tabung Reaksi</div><div class="isub">Percobaan 2 · HCl + Mg</div>
+      </div>
+      <div class="item-card alat-card">
+        <img src="https://yulinestiyarum.github.io/termokimia/gelas-ukur.png" alt="Gelas Ukur" onerror="this.src=''">
+        <div class="iname">Gelas Ukur</div><div class="isub">Mengukur volume cairan</div>
+      </div>
+      <div class="item-card alat-card">
+        <img src="https://yulinestiyarum.github.io/termokimia/spatula.png" alt="Spatula" onerror="this.src=''">
+        <div class="iname">Spatula</div><div class="isub">Mengambil serbuk/padatan</div>
+      </div>
+      <div class="item-card alat-card">
+        <img src="https://yulinestiyarum.github.io/termokimia/pipettetes.png" alt="Pipet Tetes" onerror="this.src=''">
+        <div class="iname">Pipet Tetes</div><div class="isub">Mengambil cairan kecil</div>
+      </div>
+      <div class="item-card alat-card">
+        <img src="https://yulinestiyarum.github.io/termokimia/pengadukkaca.png" alt="Pengaduk Kaca" onerror="this.src=''">
+        <div class="iname">Pengaduk Kaca</div><div class="isub">Mengaduk campuran</div>
+      </div>
+      <div class="item-card alat-card">
+        <img src="https://yulinestiyarum.github.io/termokimia/termometer.png" alt="Termometer" onerror="this.src=''">
+        <div class="iname">Termometer</div><div class="isub">Mengukur suhu campuran</div>
+      </div>
+    </div>
+
+    <div class="ab-section-title" style="margin-top:16px;">🧪 Bahan Percobaan</div>
+    <div class="card" style="margin-bottom:6px;padding:8px 12px;background:linear-gradient(135deg,#fff7ed,#fef9f0);border-color:#fed7aa;">
+      <div style="font-size:10px;font-weight:800;color:var(--exo);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">🔥 Bahan Reaksi Eksotermik</div>
+      <div class="item-grid" style="gap:6px;">
+        <div class="item-card bahan-card" style="background:#fff7ed;">
+          <img src="https://yulinestiyarum.github.io/termokimia/serbukNaOH.png" alt="NaOH" onerror="this.src=''">
+          <div class="iname">Serbuk NaOH</div><div class="isub">Natrium Hidroksida · 2 spatula</div>
+        </div>
+        <div class="item-card bahan-card" style="background:#fff7ed;">
+          <img src="https://yulinestiyarum.github.io/termokimia/pitamagnesium.png" alt="Mg" onerror="this.src=''">
+          <div class="iname">Pita Magnesium</div><div class="isub">Logam Mg · 2 cm</div>
+        </div>
+        <div class="item-card bahan-card" style="background:#fff7ed;">
+          <img src="https://yulinestiyarum.github.io/termokimia/larutanHCl.png" alt="HCl" onerror="this.src=''">
+          <div class="iname">Larutan HCl 1M</div><div class="isub">Asam Klorida · 10 mL</div>
+        </div>
+        <div class="item-card bahan-card" style="background:#fff7ed;">
+          <img src="https://yulinestiyarum.github.io/termokimia/serbukCaO.png" alt="CaO" onerror="this.src=''">
+          <div class="iname">Serbuk CaO</div><div class="isub">Kapur Tohor · 2 spatula</div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:6px;padding:8px 12px;background:linear-gradient(135deg,var(--endo3),#f0f7ff);border-color:#bfdbfe;">
+      <div style="font-size:10px;font-weight:800;color:var(--endo);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">❄️ Bahan Reaksi Endotermik</div>
+      <div class="item-grid" style="gap:6px;">
+        <div class="item-card bahan-card">
+          <img src="https://yulinestiyarum.github.io/termokimia/serbukurea.png" alt="Urea" onerror="this.src=''">
+          <div class="iname">Serbuk Urea</div><div class="isub">CO(NH₂)₂ · 3 spatula</div>
+        </div>
+        <div class="item-card bahan-card">
+          <img src="https://yulinestiyarum.github.io/termokimia/asamsitrat.png" alt="Asam Sitrat" onerror="this.src=''">
+          <div class="iname">Asam Sitrat</div><div class="isub">C₆H₈O₇ · 1 spatula</div>
+        </div>
+        <div class="item-card bahan-card">
+          <img src="https://yulinestiyarum.github.io/termokimia/sodakue.png" alt="Soda Kue" onerror="this.src=''">
+          <div class="iname">Soda Kue</div><div class="isub">NaHCO₃ · 1 spatula</div>
+        </div>
+        <div class="item-card bahan-card">
+          <img src="https://yulinestiyarum.github.io/termokimia/Ba(OH)2.8H2O.png" alt="Ba(OH)2" onerror="this.src=''">
+          <div class="iname">Ba(OH)₂·8H₂O</div><div class="isub">Padatan · 2 spatula</div>
+        </div>
+        <div class="item-card bahan-card">
+          <img src="https://yulinestiyarum.github.io/termokimia/NH4Cl.png" alt="NH4Cl" onerror="this.src=''">
+          <div class="iname">NH₄Cl</div><div class="isub">Amonium Klorida · 1 spatula</div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:0;padding:8px 12px;">
+      <div style="font-size:10px;font-weight:800;color:var(--text2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">💧 Pelarut</div>
+      <div class="item-grid" style="gap:6px;">
+        <div class="item-card" style="border-color:var(--border2);">
+          <img src="https://yulinestiyarum.github.io/termokimia/aquades.png" alt="Aquades" onerror="this.src=''">
+          <div class="iname">Aquades</div><div class="isub">Air Suling · H₂O</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PROSEDUR ============ -->
+<div id="page-prosedur" class="page">
+  <div class="scroll" style="overflow-y:auto;">
+    <div class="proc-tabs" id="procTabs">
+      <button class="ptab active" onclick="showProc(1,this)">Percobaan 1</button>
+      <button class="ptab" onclick="showProc(2,this)">Percobaan 2</button>
+      <button class="ptab endo-tab" onclick="showProc(3,this)">Percobaan 3</button>
+      <button class="ptab endo-tab" onclick="showProc(4,this)">Percobaan 4</button>
+      <button class="ptab endo-tab" onclick="showProc(5,this)">Percobaan 5</button>
+      <button class="ptab endo-tab" onclick="showProc(6,this)">Percobaan 6</button>
+    </div>
+
+    <!-- Proc 1 -->
+    <div class="proc-content active" id="proc1">
+      <div class="proc-title-row">
+        <div class="proc-badge" style="background:linear-gradient(135deg,#fff7ed,#fed7aa);border:1px solid #fb923c;color:#9a3412;">🔥 Eksotermik</div>
+        <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--text);">Percobaan 1 — Pelarutan Natrium Hidroksida (NaOH)</div>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="snum">1</div><p>Tuangkan <span class="chem-symbol"><img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/aquades.png">💧 20 mL aquades</span> ke dalam <strong>gelas kimia</strong>.</p></div>
+        <div class="step"><div class="snum">2</div><p>Ukur <strong>suhu awal</strong> air menggunakan termometer <img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/termometer.png"> dan catat datanya.</p></div>
+        <div class="step"><div class="snum">3</div><p>Ambil <span class="chem-symbol exo-sym"><img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/serbukNaOH.png">NaOH — 2 spatula</span> serbuk NaOH, lalu masukkan ke dalam gelas kimia.</p></div>
+        <div class="step"><div class="snum">4</div><p>Aduk perlahan menggunakan <strong>pengaduk kaca</strong> <img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/pengadukkaca.png"> hingga NaOH larut sepenuhnya.</p></div>
+        <div class="step"><div class="snum">5</div><p>Ukur <strong>suhu akhir</strong> larutan menggunakan termometer dan catat suhu tertinggi yang dicapai.</p></div>
+      </div>
+      <div class="notebox"><div class="nt">💡 Hasil yang diharapkan</div><p>Suhu larutan <strong>meningkat</strong> (T akhir &gt; T awal) → Reaksi Eksotermik · ΔH &lt; 0</p></div>
+    </div>
+
+    <!-- Proc 2 -->
+    <div class="proc-content" id="proc2">
+      <div class="proc-title-row">
+        <div class="proc-badge" style="background:linear-gradient(135deg,#fff7ed,#fed7aa);border:1px solid #fb923c;color:#9a3412;">🔥 Eksotermik</div>
+        <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--text);">Percobaan 2 — Reaksi HCl dan Pita Magnesium</div>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="snum">1</div><p>Masukkan <span class="chem-symbol exo-sym"><img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/larutanHCl.png">HCl — 10 mL</span> larutan HCl 1M ke dalam <strong>tabung reaksi</strong>.</p></div>
+        <div class="step"><div class="snum">2</div><p>Ukur dan catat <strong>suhu awal</strong> larutan HCl menggunakan termometer <img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/termometer.png">.</p></div>
+        <div class="step"><div class="snum">3</div><p>Masukkan <span class="chem-symbol exo-sym"><img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/pitamagnesium.png">Mg — 2 cm</span> potongan pita Magnesium ke dalam tabung reaksi.</p></div>
+        <div class="step"><div class="snum">4</div><p>Amati pembentukan <strong>gelembung gas</strong> yang terjadi (gas H₂ yang dihasilkan).</p></div>
+        <div class="step"><div class="snum">5</div><p>Ukur suhu campuran menggunakan termometer dan catat <strong>suhu tertinggi</strong> yang dicapai.</p></div>
+      </div>
+      <div class="notebox"><div class="nt">💡 Hasil yang diharapkan</div><p>Terbentuk <strong>gelembung gas H₂</strong>, suhu <strong>meningkat</strong> → Reaksi Eksotermik · Mg(s) + 2HCl(aq) → MgCl₂(aq) + H₂↑ + kalor</p></div>
+    </div>
+
+    <!-- Proc 3 -->
+    <div class="proc-content" id="proc3">
+      <div class="proc-title-row">
+        <div class="proc-badge" style="background:linear-gradient(135deg,#fff7ed,#fed7aa);border:1px solid #fb923c;color:#9a3412;">🔥 Eksotermik</div>
+        <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--text);">Percobaan 3 — Hidrasi Kapur Tohor (CaO)</div>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="snum">1</div><p>Tuangkan <span class="chem-symbol"><img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/aquades.png">💧 20 mL aquades</span> ke dalam <strong>gelas kimia</strong>.</p></div>
+        <div class="step"><div class="snum">2</div><p>Ukur dan catat <strong>suhu awal</strong> air menggunakan termometer <img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/termometer.png">.</p></div>
+        <div class="step"><div class="snum">3</div><p>Tambahkan <span class="chem-symbol exo-sym"><img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/serbukCaO.png">CaO — 2 spatula</span> serbuk kapur tohor ke dalam gelas kimia.</p></div>
+        <div class="step"><div class="snum">4</div><p>Aduk perlahan menggunakan pengaduk kaca <img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/pengadukkaca.png"> dan amati perubahan fisik.</p></div>
+        <div class="step"><div class="snum">5</div><p>Ukur suhu campuran dan catat <strong>suhu tertinggi</strong> yang dicapai.</p></div>
+      </div>
+      <div class="notebox"><div class="nt">💡 Hasil yang diharapkan</div><p>Suhu <strong>meningkat drastis</strong>, campuran mengeluarkan uap → Eksotermik · CaO + H₂O → Ca(OH)₂ + kalor</p></div>
+    </div>
+
+    <!-- Proc 4 -->
+    <div class="proc-content" id="proc4">
+      <div class="proc-title-row">
+        <div class="proc-badge" style="background:linear-gradient(135deg,var(--endo3),#bfdbfe);border:1px solid #93c5fd;color:#1e3a8a;">❄️ Endotermik</div>
+        <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--text);">Percobaan 4 — Pelarutan Urea</div>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="snum">1</div><p>Tuangkan <span class="chem-symbol"><img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/aquades.png">💧 20 mL aquades</span> ke dalam <strong>gelas kimia</strong>.</p></div>
+        <div class="step"><div class="snum">2</div><p>Ukur dan catat <strong>suhu awal</strong> air menggunakan termometer.</p></div>
+        <div class="step"><div class="snum">3</div><p>Tambahkan <span class="chem-symbol"><img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/serbukurea.png">Urea — 3 spatula</span> serbuk urea ke dalam air.</p></div>
+        <div class="step"><div class="snum">4</div><p>Aduk perlahan menggunakan pengaduk kaca hingga urea larut dengan sempurna.</p></div>
+        <div class="step"><div class="snum">5</div><p>Ukur menggunakan termometer dan catat <strong>suhu terendah</strong> yang dicapai oleh larutan.</p></div>
+      </div>
+      <div class="notebox" style="background:#eff6ff;border-color:#93c5fd;"><div class="nt" style="color:var(--endo);">💡 Hasil yang diharapkan</div><p style="color:#1e3a8a;">Suhu larutan <strong>menurun</strong> (T akhir &lt; T awal), larutan terasa dingin → Reaksi Endotermik · ΔH &gt; 0</p></div>
+    </div>
+
+    <!-- Proc 5 -->
+    <div class="proc-content" id="proc5">
+      <div class="proc-title-row">
+        <div class="proc-badge" style="background:linear-gradient(135deg,var(--endo3),#bfdbfe);border:1px solid #93c5fd;color:#1e3a8a;">❄️ Endotermik</div>
+        <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--text);">Percobaan 5 — Asam Sitrat + Soda Kue</div>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="snum">1</div><p>Tuangkan <span class="chem-symbol"><img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/aquades.png">💧 20 mL aquades</span> ke dalam <strong>gelas kimia</strong>.</p></div>
+        <div class="step"><div class="snum">2</div><p>Ukur dan catat <strong>suhu awal</strong> air menggunakan termometer.</p></div>
+        <div class="step"><div class="snum">3</div><p>Masukkan <span class="chem-symbol"><img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/asamsitrat.png">C₆H₈O₇</span> 1 spatula asam sitrat dan <span class="chem-symbol"><img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/sodakue.png">NaHCO₃</span> 1 spatula soda kue secara bersamaan ke dalam gelas kimia.</p></div>
+        <div class="step"><div class="snum">4</div><p>Aduk perlahan dan amati pembentukan <strong>gelembung gas CO₂</strong> secara saksama.</p></div>
+        <div class="step"><div class="snum">5</div><p>Ukur menggunakan termometer dan catat <strong>suhu terendah</strong> yang dicapai campuran.</p></div>
+      </div>
+      <div class="notebox" style="background:#eff6ff;border-color:#93c5fd;"><div class="nt" style="color:var(--endo);">💡 Hasil yang diharapkan</div><p style="color:#1e3a8a;">Terbentuk <strong>gelembung gas CO₂</strong>, suhu <strong>menurun</strong> → Endotermik · C₆H₈O₇ + 3NaHCO₃ → produk + 3CO₂↑</p></div>
+    </div>
+
+    <!-- Proc 6 -->
+    <div class="proc-content" id="proc6">
+      <div class="proc-title-row">
+        <div class="proc-badge" style="background:linear-gradient(135deg,var(--endo3),#bfdbfe);border:1px solid #93c5fd;color:#1e3a8a;">❄️ Endotermik</div>
+        <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--text);">Percobaan 6 — Ba(OH)₂·8H₂O + NH₄Cl</div>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="snum">1</div><p>Siapkan <strong>sepotong kayu tipis</strong>, teteskan sedikit air tepat di tengah permukaannya.</p></div>
+        <div class="step"><div class="snum">2</div><p>Letakkan <strong>gelas kimia</strong> di atas tetesan air tersebut agar menempel.</p></div>
+        <div class="step"><div class="snum">3</div><p>Masukkan <span class="chem-symbol"><img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/Ba(OH)2.8H2O.png">Ba(OH)₂ — 2 spatula</span> dan <span class="chem-symbol"><img class="chem-img-inline" src="https://yulinestiyarum.github.io/termokimia/NH4Cl.png">NH₄Cl — 1 spatula</span> ke dalam gelas kimia.</p></div>
+        <div class="step"><div class="snum">4</div><p>Aduk kedua serbuk padat secara terus-menerus menggunakan <strong>pengaduk kaca</strong> hingga campuran berubah wujud menjadi pasta/cair.</p></div>
+        <div class="step"><div class="snum">5</div><p>Ukur suhu campuran dan catat <strong>suhu terendahnya</strong>. Amati apakah kayu menempel pada gelas.</p></div>
+      </div>
+      <div class="notebox" style="background:#eff6ff;border-color:#93c5fd;"><div class="nt" style="color:var(--endo);">💡 Hasil yang diharapkan</div><p style="color:#1e3a8a;">Suhu turun drastis (kayu bisa membeku menempel), bau amonia → Endotermik · Ba(OH)₂·8H₂O + 2NH₄Cl → BaCl₂ + 2NH₃↑ + 10H₂O</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SIMULASI ============ -->
+<div id="page-simulasi" class="page">
+  <div style="padding:10px 16px 0;flex-shrink:0;">
+    <div class="sim-exp-tabs" id="simExpTabs">
+      <button class="sim-etab active" onclick="loadExp(1,this)">⚗️ Percobaan 1</button>
+      <button class="sim-etab" onclick="loadExp(2,this)">⚗️ Percobaan 2</button>
+      <button class="sim-etab" onclick="loadExp(3,this)">⚗️ Percobaan 3</button>
+      <button class="sim-etab" onclick="loadExp(4,this)">⚗️ Percobaan 4</button>
+      <button class="sim-etab" onclick="loadExp(5,this)">⚗️ Percobaan 5</button>
+      <button class="sim-etab" onclick="loadExp(6,this)">⚗️ Percobaan 6</button>
+    </div>
+  </div>
+  <div class="sim-area" style="padding:0 16px 12px;flex:1;overflow:hidden;" id="simArea">
+    <!-- Rendered by JS -->
+  </div>
+</div>
+
+<!-- ============ DISKUSI ============ -->
+<div id="page-diskusi" class="page">
+  <div class="scroll" style="overflow-y:auto;">
+    <div class="card" style="margin-bottom:8px;">
+      <div class="ch"><div class="ci b">💬</div><div class="ct">Pertanyaan Diskusi</div></div>
+      <p style="font-size:12px;color:var(--text3);">Jawablah pertanyaan berikut berdasarkan hasil percobaan yang telah kamu lakukan di simulasi.</p>
+    </div>
+    <div class="disc-q">
+      <div class="disc-q-num">Pertanyaan 01</div>
+      <div class="disc-q-text">Percobaan mana saja yang merupakan contoh reaksi eksotermik? Jelaskan alasanmu berdasarkan data suhu yang kamu amati!</div>
+      <textarea class="disc-textarea" placeholder="Tulis jawabanmu di sini…" rows="4"></textarea>
+    </div>
+    <div class="disc-q">
+      <div class="disc-q-num">Pertanyaan 02</div>
+      <div class="disc-q-text">Percobaan mana saja yang merupakan contoh reaksi endotermik? Jelaskan alasanmu!</div>
+      <textarea class="disc-textarea" placeholder="Tulis jawabanmu di sini…" rows="4"></textarea>
+    </div>
+    <div class="disc-q">
+      <div class="disc-q-num">Pertanyaan 03</div>
+      <div class="disc-q-text">Jelaskan 3 perbedaan reaksi eksotermik dengan reaksi endotermik berdasarkan hasil percobaan yang telah kamu lakukan!</div>
+      <textarea class="disc-textarea" placeholder="Tulis jawabanmu di sini…" rows="5"></textarea>
+    </div>
+    <div class="disc-q">
+      <div class="disc-q-num">Pertanyaan 04</div>
+      <div class="disc-q-text">Buat kesimpulan dari percobaan yang telah kamu lakukan! Apa yang dimaksud dengan reaksi eksotermik dan endotermik, dan bagaimana cara membedakannya?</div>
+      <textarea class="disc-textarea" placeholder="Tulis kesimpulanmu di sini…" rows="5"></textarea>
+    </div>
+    <div style="text-align:right;margin-top:8px;">
+      <button onclick="saveDiscussion()" style="background:linear-gradient(135deg,var(--exo),var(--exo2));color:#fff;border:none;border-radius:8px;padding:10px 24px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(234,88,12,.35);transition:all .17s;">💾 Simpan Jawaban</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- end #app -->
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<!-- Celebration overlay -->
+<div class="celeb-overlay" id="celebOverlay">
+  <div class="celeb-box">
+    <span class="celeb-emoji" id="celebEmoji">🎉</span>
+    <div class="celeb-title" id="celebTitle">Reaksi Berhasil!</div>
+    <div class="celeb-sub" id="celebSub">Semua bahan telah ditambahkan.</div>
+    <button class="celeb-btn" onclick="closeCeleb()">Lanjutkan ➜</button>
+  </div>
+</div>
+
+<script>
+// ============ SOUND ENGINE ============
+const SFX = (function(){
+  let ctx = null;
+  function init(){
+    if(!ctx) ctx = new (window.AudioContext||window.webkitAudioContext)();
+    if(ctx.state==='suspended') ctx.resume();
+    return ctx;
+  }
+  function click(){
+    const c=init();const o=c.createOscillator();const g=c.createGain();
+    o.connect(g);g.connect(c.destination);o.type='triangle';o.frequency.value=700;
+    g.gain.setValueAtTime(0.12,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.07);
+    o.start();o.stop(c.currentTime+0.07);
+  }
+  function drop(){
+    const c=init();const o=c.createOscillator();const g=c.createGain();
+    o.connect(g);g.connect(c.destination);o.type='sine';
+    o.frequency.setValueAtTime(520,c.currentTime);o.frequency.exponentialRampToValueAtTime(160,c.currentTime+0.2);
+    g.gain.setValueAtTime(0.32,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.28);
+    o.start();o.stop(c.currentTime+0.28);
+  }
+  function success(){
+    const c=init();
+    [523,659,784,1047].forEach((freq,i)=>{
+      const o=c.createOscillator();const g=c.createGain();
+      o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=freq;
+      const t=c.currentTime+i*0.13;
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.22,t+0.03);g.gain.exponentialRampToValueAtTime(0.001,t+0.5);
+      o.start(t);o.stop(t+0.5);
+    });
+  }
+  function start(){
+    const c=init();
+    [400,500,630].forEach((freq,i)=>{
+      const o=c.createOscillator();const g=c.createGain();
+      o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.value=freq;
+      const t=c.currentTime;
+      g.gain.setValueAtTime(0.1,t);g.gain.linearRampToValueAtTime(0.18,t+0.08);g.gain.exponentialRampToValueAtTime(0.001,t+0.35);
+      o.start(t);o.stop(t+0.35);
+    });
+  }
+  function bubble(n=4){
+    const c=init();
+    for(let i=0;i<n;i++){
+      const o=c.createOscillator();const g=c.createGain();
+      o.connect(g);g.connect(c.destination);o.type='sine';
+      const f=180+Math.random()*280;const delay=i*0.09;
+      o.frequency.setValueAtTime(f,c.currentTime+delay);
+      o.frequency.exponentialRampToValueAtTime(f*0.65,c.currentTime+delay+0.14);
+      g.gain.setValueAtTime(0.07,c.currentTime+delay);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+delay+0.18);
+      o.start(c.currentTime+delay);o.stop(c.currentTime+delay+0.18);
+    }
+  }
+  function sizzle(){
+    const c=init();
+    const buf=c.createBuffer(1,c.sampleRate*0.5,c.sampleRate);
+    const data=buf.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*0.25;
+    const src=c.createBufferSource();const g=c.createGain();const f=c.createBiquadFilter();
+    src.buffer=buf;f.type='highpass';f.frequency.value=2000;
+    src.connect(f);f.connect(g);g.connect(c.destination);
+    g.gain.setValueAtTime(0.4,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.5);
+    src.start();src.stop(c.currentTime+0.5);
+  }
+  return {click,drop,success,start,bubble,sizzle};
+})();
+
+// Click sound on any button
+document.addEventListener('click',function(e){
+  const el=e.target.closest('button,.nb,.ptab,.sim-etab');
+  if(!el||el.id==='btnMulaiPraktikum') return;
+  SFX.click();
+});
+
+// ============ NAV ============
+function show(pageId,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+pageId).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+function toggleNav(){
+  const n=document.getElementById('mainNav');n.classList.toggle('open');
+}
+function closeNav(){
+  document.getElementById('mainNav').classList.remove('open');
+}
+
+// ============ PROSEDUR TABS ============
+function showProc(n,btn){
+  document.querySelectorAll('.proc-content').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('proc'+n).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ============ TOAST ============
+let toastTimer;
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.innerHTML=msg;t.className='toast'+(type?' toast-'+type:'');
+  void t.offsetWidth;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ============ CELEBRATION ============
+function showCeleb(emoji,title,sub){
+  const ov=document.getElementById('celebOverlay');
+  document.getElementById('celebEmoji').textContent=emoji;
+  document.getElementById('celebTitle').textContent=title;
+  document.getElementById('celebSub').innerHTML=sub;
+  ov.classList.add('on');
+  SFX.success();
+}
+function closeCeleb(){document.getElementById('celebOverlay').classList.remove('on');}
+
+// ============ EXPERIMENT DATA ============
+const EXPS = {
+  1:{
+    title:'Percobaan 1',subtitle:'Pelarutan Natrium Hidroksida (NaOH)',
+    vessel:'beaker',type:'exo',tempStart:27,tempEnd:42,deltaT:'+15°C',
+    materials:[
+      {id:'aq1',name:'Aquades',amount:'20 mL',img:'https://yulinestiyarum.github.io/termokimia/aquades.png'},
+      {id:'naoh1',name:'Serbuk NaOH',amount:'2 spatula',img:'https://yulinestiyarum.github.io/termokimia/serbukNaOH.png'},
+    ],
+    reaction:'NaOH(s) → Na⁺(aq) + OH⁻(aq) + kalor',
+    obs:'Suhu larutan meningkat. Wadah terasa panas. NaOH larut melepaskan kalor ke lingkungan.',
+    gasType:null
+  },
+  2:{
+    title:'Percobaan 2',subtitle:'Reaksi HCl dan Pita Magnesium',
+    vessel:'tube',type:'exo',tempStart:27,tempEnd:47,deltaT:'+20°C',
+    materials:[
+      {id:'hcl2',name:'Larutan HCl 1M',amount:'10 mL',img:'https://yulinestiyarum.github.io/termokimia/larutanHCl.png'},
+      {id:'mg2',name:'Pita Magnesium',amount:'2 cm',img:'https://yulinestiyarum.github.io/termokimia/pitamagnesium.png'},
+    ],
+    reaction:'Mg(s) + 2HCl(aq) → MgCl₂(aq) + H₂↑ + kalor',
+    obs:'Terbentuk gelembung gas H₂. Suhu meningkat signifikan.',
+    gasType:'H₂'
+  },
+  3:{
+    title:'Percobaan 3',subtitle:'Hidrasi Kapur Tohor (CaO)',
+    vessel:'beaker',type:'exo',tempStart:27,tempEnd:52,deltaT:'+25°C',
+    materials:[
+      {id:'aq3',name:'Aquades',amount:'20 mL',img:'https://yulinestiyarum.github.io/termokimia/aquades.png'},
+      {id:'cao3',name:'Serbuk CaO',amount:'2 spatula',img:'https://yulinestiyarum.github.io/termokimia/serbukCaO.png'},
+    ],
+    reaction:'CaO(s) + H₂O(l) → Ca(OH)₂(aq) + kalor',
+    obs:'Suhu meningkat drastis. Tampak uap di atas permukaan larutan.',
+    gasType:'steam'
+  },
+  4:{
+    title:'Percobaan 4',subtitle:'Pelarutan Urea',
+    vessel:'beaker',type:'endo',tempStart:27,tempEnd:19,deltaT:'−8°C',
+    materials:[
+      {id:'aq4',name:'Aquades',amount:'20 mL',img:'https://yulinestiyarum.github.io/termokimia/aquades.png'},
+      {id:'urea4',name:'Serbuk Urea',amount:'3 spatula',img:'https://yulinestiyarum.github.io/termokimia/serbukurea.png'},
+    ],
+    reaction:'CO(NH₂)₂(s) + H₂O(l) → larutan urea (menyerap kalor)',
+    obs:'Suhu larutan menurun. Wadah terasa dingin saat dipegang.',
+    gasType:null
+  },
+  5:{
+    title:'Percobaan 5',subtitle:'Asam Sitrat + Soda Kue',
+    vessel:'beaker',type:'endo',tempStart:27,tempEnd:17,deltaT:'−10°C',
+    materials:[
+      {id:'aq5',name:'Aquades',amount:'20 mL',img:'https://yulinestiyarum.github.io/termokimia/aquades.png'},
+      {id:'asit5',name:'Asam Sitrat',amount:'1 spatula',img:'https://yulinestiyarum.github.io/termokimia/asamsitrat.png'},
+      {id:'sk5',name:'Soda Kue',amount:'1 spatula',img:'https://yulinestiyarum.github.io/termokimia/sodakue.png'},
+    ],
+    reaction:'C₆H₈O₇ + 3NaHCO₃ → Na₃C₆H₅O₇ + 3H₂O + 3CO₂↑',
+    obs:'Terbentuk banyak gelembung gas CO₂. Suhu campuran menurun.',
+    gasType:'CO₂'
+  },
+  6:{
+    title:'Percobaan 6',subtitle:'Ba(OH)₂·8H₂O + NH₄Cl',
+    vessel:'beaker',type:'endo',tempStart:27,tempEnd:7,deltaT:'−20°C',
+    materials:[
+      {id:'baoh6',name:'Ba(OH)₂·8H₂O',amount:'2 spatula',img:'https://yulinestiyarum.github.io/termokimia/Ba(OH)2.8H2O.png'},
+      {id:'nh4cl6',name:'NH₄Cl',amount:'1 spatula',img:'https://yulinestiyarum.github.io/termokimia/NH4Cl.png'},
+    ],
+    reaction:'Ba(OH)₂·8H₂O + 2NH₄Cl → BaCl₂ + 2NH₃↑ + 10H₂O',
+    obs:'Campuran berubah menjadi pasta. Suhu menurun drastis. Tercium bau amonia (NH₃).',
+    gasType:'NH₃'
+  }
+};
+
+// ============ SIMULATION STATE ============
+let curExp = 1;
+let droppedMats = new Set();
+let animInterval = null;
+let tempAnimTimer = null;
+
+// Drag state
+let dragId=null,touchCard=null,touchClone=null,touchDragging=false,touchLongTimer=null,touchStartX=0,touchStartY=0;
+
+function loadExp(n,btn){
+  curExp=n;
+  droppedMats.clear();
+  clearAnimations();
+  document.querySelectorAll('.sim-etab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSim();
+}
+
+function clearAnimations(){
+  if(animInterval){clearInterval(animInterval);animInterval=null;}
+  if(tempAnimTimer){clearTimeout(tempAnimTimer);tempAnimTimer=null;}
+}
+
+function renderSim(){
+  const exp=EXPS[curExp];
+  const sa=document.getElementById('simArea');
+  const isExo=exp.type==='exo';
+
+  sa.innerHTML=`
+  <div class="mat-panel">
+    <h3 style="color:${isExo?'var(--exo)':'var(--endo)'}">${exp.title}</h3>
+    <div style="font-size:11px;color:var(--text3);margin:-4px 0 2px;line-height:1.5;">${exp.subtitle}</div>
+    <div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-top:6px;">🧪 Bahan yang Diperlukan</div>
+    <div class="mat-list" id="matList">
+      ${exp.materials.map(m=>`
+        <div class="mat-item" id="mat-${m.id}" draggable="true" data-id="${m.id}">
+          <img src="${m.img}" alt="${m.name}" onerror="this.src=''" style="height:36px;width:36px;object-fit:contain;">
+          <div class="mat-item-info">
+            <strong>${m.name}</strong>
+            <span>${m.amount}</span>
+          </div>
+          <span class="mat-item-badge" id="badge-${m.id}">Drag!</span>
+        </div>
+      `).join('')}
+    </div>
+    <button class="reset-btn" onclick="resetExp()">↺ Ulangi Percobaan</button>
+    <div style="margin-top:8px;font-size:10px;color:var(--text3);text-align:center;line-height:1.5;">Drag bahan satu per satu ke dalam<br><strong>${exp.vessel==='beaker'?'Gelas Kimia':'Tabung Reaksi'}</strong></div>
+  </div>
+  <div class="vessel-panel">
+    <div class="vessel-card">
+      <h3>⚗️ ${exp.vessel==='beaker'?'Gelas Kimia':'Tabung Reaksi'} — Area Percobaan</h3>
+      <div class="vessel-main">
+        <div class="vessel-svg-wrap" id="vesselWrap">
+          ${exp.vessel==='beaker' ? beakerSVG(isExo) : tubeSVG(isExo)}
+          <div class="vessel-drop-zone" id="vesselDrop" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)"></div>
+        </div>
+        <div class="reaction-info">
+          <div class="ri-status idle" id="riStatus">💡 Drag bahan ke dalam wadah untuk memulai percobaan…</div>
+          <div class="temp-display">
+            <div style="font-size:9.5px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">🌡️ Suhu Campuran</div>
+            <div class="temp-val temp-neutral" id="tempVal">${exp.tempStart}°C</div>
+            <div class="temp-label">Suhu awal: ${exp.tempStart}°C &nbsp;|&nbsp; Perubahan: <span id="deltaTSpan">0°C</span></div>
+            <div class="temp-bar"><div class="temp-bar-fill" id="tempBar" style="width:50%;background:var(--text3);"></div></div>
+          </div>
+          <div id="droppedList" style="font-size:11px;color:var(--text3);">Belum ada bahan yang ditambahkan.</div>
+          <div id="reactionResult" style="display:none;">
+            <div class="ri-obs" id="riObs"></div>
+            <div class="ri-formula" id="riFormula"></div>
+            <div class="ri-badge-row" id="riBadges"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  setupDragListeners();
+}
+
+function beakerSVG(isExo){
+  const col = isExo ? '#fed7aa' : '#bfdbfe';
+  const id = 'liq'+Math.random().toString(36).slice(2,6);
+  return `
+  <svg viewBox="0 0 200 310" xmlns="http://www.w3.org/2000/svg" style="height:clamp(200px,26vh,280px);width:auto;overflow:visible;">
+    <defs>
+      <clipPath id="bcp${id}">
+        <path d="M 55 55 L 145 55 L 140 265 Q 140 275 120 275 L 80 275 Q 60 275 60 265 Z"/>
+      </clipPath>
+      <linearGradient id="lg${id}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${isExo?'rgba(251,146,60,0.25)':'rgba(147,197,253,0.25)'}" id="lgStop1${id}"/>
+        <stop offset="100%" stop-color="${isExo?'rgba(251,146,60,0.6)':'rgba(147,197,253,0.6)'}" id="lgStop2${id}"/>
+      </linearGradient>
+    </defs>
+    <!-- Beaker glass body -->
+    <path d="M 50 45 L 150 45 L 145 265 Q 145 280 120 280 L 80 280 Q 55 280 55 265 Z" 
+          fill="rgba(219,234,254,0.12)" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>
+    <!-- Beaker rim -->
+    <rect x="45" y="38" width="110" height="14" rx="4" fill="rgba(219,234,254,0.18)" stroke="${col}" stroke-width="2"/>
+    <!-- Beaker measurement lines -->
+    <line x1="58" y1="180" x2="70" y2="180" stroke="${col}" stroke-width="1" opacity="0.5"/>
+    <line x1="58" y1="210" x2="70" y2="210" stroke="${col}" stroke-width="1" opacity="0.5"/>
+    <line x1="58" y1="240" x2="70" y2="240" stroke="${col}" stroke-width="1" opacity="0.5"/>
+    <text x="73" y="183" font-size="8" fill="${col}" opacity="0.6" font-family="JetBrains Mono">20mL</text>
+    <!-- Liquid layer -->
+    <rect id="liqRect" x="52" y="200" width="97" height="80" clip-path="url(#bcp${id})" fill="url(#lg${id})" style="transition:y 0.6s ease,height 0.6s ease;"/>
+    <!-- Particles container -->
+    <g id="particles" clip-path="url(#bcp${id})"></g>
+    <!-- Sheen -->
+    <path d="M 60 48 Q 80 46 100 48" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function tubeSVG(isExo){
+  const col = isExo ? '#fed7aa' : '#bfdbfe';
+  const id = 'tub'+Math.random().toString(36).slice(2,6);
+  return `
+  <svg viewBox="0 0 130 340" xmlns="http://www.w3.org/2000/svg" style="height:clamp(200px,26vh,280px);width:auto;overflow:visible;">
+    <defs>
+      <clipPath id="tcp${id}">
+        <path d="M 45 40 L 85 40 L 85 275 Q 85 305 65 305 Q 45 305 45 275 Z"/>
+      </clipPath>
+      <linearGradient id="tlg${id}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${isExo?'rgba(251,146,60,0.25)':'rgba(147,197,253,0.25)'}" id="tlgS1${id}"/>
+        <stop offset="100%" stop-color="${isExo?'rgba(251,146,60,0.6)':'rgba(147,197,253,0.6)'}" id="tlgS2${id}"/>
+      </linearGradient>
+    </defs>
+    <!-- Test tube body -->
+    <path d="M 42 30 L 88 30 L 88 275 Q 88 310 65 310 Q 42 310 42 275 Z"
+          fill="rgba(219,234,254,0.12)" stroke="${col}" stroke-width="2.5"/>
+    <!-- Rim -->
+    <rect x="37" y="22" width="56" height="14" rx="4" fill="rgba(219,234,254,0.18)" stroke="${col}" stroke-width="2"/>
+    <!-- Liquid -->
+    <rect id="liqRect" x="43" y="180" width="44" height="130" clip-path="url(#tcp${id})" fill="url(#tlg${id})" style="transition:y 0.6s ease,height 0.6s ease;"/>
+    <!-- Particles -->
+    <g id="particles" clip-path="url(#tcp${id})"></g>
+    <!-- Sheen -->
+    <path d="M 49 33 Q 58 31 67 33" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+}
+
+// ============ DRAG & DROP ============
+function setupDragListeners(){
+  const items=document.querySelectorAll('.mat-item');
+  const dropZone=document.getElementById('vesselDrop');
+
+  items.forEach(item=>{
+    item.addEventListener('dragstart',e=>{
+      if(item.classList.contains('dropped')) return e.preventDefault();
+      dragId=item.dataset.id;
+      item.style.opacity='0.4';
+      e.dataTransfer.effectAllowed='copy';
+    });
+    item.addEventListener('dragend',()=>{item.style.opacity='';});
+
+    // Touch events
+    item.addEventListener('touchstart',e=>{
+      if(item.classList.contains('dropped')) return;
+      const t=e.touches[0];touchStartX=t.clientX;touchStartY=t.clientY;touchDragging=false;
+      touchLongTimer=setTimeout(()=>{
+        touchDragging=true;touchCard=item;dragId=item.dataset.id;
+        if(navigator.vibrate) navigator.vibrate(25);
+        item.classList.add('touch-active');
+        const rect=item.getBoundingClientRect();
+        const clone=document.getElementById('touchDragClone');
+        clone.innerHTML=item.outerHTML;
+        clone.style.cssText=`position:fixed;z-index:99998;pointer-events:none;opacity:.88;transform:scale(1.06);box-shadow:0 8px 28px rgba(0,0,0,.28);border-radius:8px;width:${rect.width}px;height:${rect.height}px;top:${rect.top}px;left:${rect.left}px;display:block;`;
+      },110);
+    },{passive:true});
+
+    item.addEventListener('touchmove',e=>{
+      const t=e.touches[0];
+      if(!touchDragging){
+        if(Math.abs(t.clientX-touchStartX)>8||Math.abs(t.clientY-touchStartY)>8){clearTimeout(touchLongTimer);touchLongTimer=null;}
+        return;
+      }
+      e.preventDefault();
+      const clone=document.getElementById('touchDragClone');
+      if(!clone||!touchCard) return;
+      const rect=touchCard.getBoundingClientRect();
+      clone.style.top=(t.clientY-rect.height/2)+'px';clone.style.left=(t.clientX-rect.width/2)+'px';
+      // Highlight drop zone
+      clone.style.display='none';
+      const el=document.elementFromPoint(t.clientX,t.clientY);clone.style.display='block';
+      const dz=document.getElementById('vesselDrop');
+      if(el&&el.closest('#vesselDrop')){dz.classList.add('drag-over');}else{dz.classList.remove('drag-over');}
+    },{passive:false});
+
+    item.addEventListener('touchend',e=>{
+      clearTimeout(touchLongTimer);touchLongTimer=null;
+      if(!touchDragging||!touchCard){touchDragging=false;return;}
+      const t=e.changedTouches[0];
+      const clone=document.getElementById('touchDragClone');
+      if(clone)clone.style.display='none';
+      const el=document.elementFromPoint(t.clientX,t.clientY);
+      if(clone)clone.style.display='none';
+      if(el&&el.closest('#vesselDrop')) dropMaterial(dragId);
+      const dz=document.getElementById('vesselDrop');if(dz)dz.classList.remove('drag-over');
+      if(touchCard){touchCard.classList.remove('touch-active');touchCard=null;}
+      if(clone)clone.style.display='none';
+      touchDragging=false;dragId=null;
+    });
+
+    item.addEventListener('touchcancel',()=>{
+      clearTimeout(touchLongTimer);touchLongTimer=null;
+      if(touchCard){touchCard.classList.remove('touch-active');touchCard=null;}
+      const clone=document.getElementById('touchDragClone');if(clone)clone.style.display='none';
+      touchDragging=false;dragId=null;
+    });
+  });
+
+  if(dropZone){
+    dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag-over');});
+    dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');if(dragId)dropMaterial(dragId);dragId=null;});
+  }
+}
+
+function handleDrop(e){e.preventDefault();e.currentTarget.classList.remove('drag-over');if(dragId){dropMaterial(dragId);dragId=null;}}
+
+function dropMaterial(id){
+  const exp=EXPS[curExp];
+  const mat=exp.materials.find(m=>m.id===id);
+  if(!mat||droppedMats.has(id)) return;
+
+  droppedMats.add(id);
+  SFX.drop();
+
+  // Mark item as dropped
+  const el=document.getElementById('mat-'+id);
+  if(el){el.classList.add('dropped');el.querySelector('.mat-item-badge').textContent='✓ Ditambahkan';el.querySelector('.mat-item-badge').classList.add('dropped-badge');}
+
+  // Animate liquid rise
+  animateLiquidRise(droppedMats.size,exp.materials.length,exp.type==='exo');
+
+  // Show particles
+  if(droppedMats.size>=1){spawnParticles(exp.type,mat,exp.gasType,droppedMats.size===exp.materials.length);}
+
+  // Update dropped list
+  updateDroppedList(mat.name);
+
+  // Update status
+  const status=document.getElementById('riStatus');
+  if(status) status.className='ri-status running';
+  if(status) status.textContent=`⏳ Menambahkan ${mat.name}… (${droppedMats.size}/${exp.materials.length})`;
+
+  // If all dropped: trigger reaction
+  if(droppedMats.size===exp.materials.length){
+    setTimeout(()=>triggerReaction(exp),600);
+  } else {
+    SFX.bubble(2);
+  }
+}
+
+function updateDroppedList(name){
+  const dl=document.getElementById('droppedList');
+  if(!dl) return;
+  if(dl.style.color===getComputedStyle(dl).color&&dl.textContent.startsWith('Belum')){dl.innerHTML='';}
+  dl.innerHTML=(dl.innerHTML.replace('Belum ada bahan yang ditambahkan.',''))+`<div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--green);font-weight:600;margin-top:3px;"><span style="color:var(--green);">✓</span> ${name} ditambahkan</div>`;
+}
+
+function animateLiquidRise(dropped,total,isExo){
+  const svg=document.getElementById('vesselWrap');
+  if(!svg) return;
+  const liq=svg.querySelector('#liqRect');
+  if(!liq) return;
+  const ratio=dropped/total;
+  // Beaker: y from 200→140, height 80→140
+  const isBeaker=EXPS[curExp].vessel==='beaker';
+  if(isBeaker){
+    const newY=200-ratio*70;const newH=80+ratio*65;
+    liq.style.y=newY+'px';liq.style.height=newH+'px';
+    liq.setAttribute('y',newY);liq.setAttribute('height',newH);
+  } else {
+    const newY=180-ratio*80;const newH=130+ratio*50;
+    liq.style.y=newY+'px';liq.style.height=newH+'px';
+    liq.setAttribute('y',newY);liq.setAttribute('height',newH);
+  }
+  // Change color if exo
+  const svg2=svg.querySelector('svg');
+  if(svg2){
+    const stops=svg2.querySelectorAll('stop');
+    if(isExo&&dropped===total){
+      stops.forEach(s=>{s.style.transition='stop-color .5s';});
+      if(stops[0]) stops[0].setAttribute('stop-color','rgba(251,100,36,0.4)');
+      if(stops[1]) stops[1].setAttribute('stop-color','rgba(234,88,12,0.7)');
+    }
+  }
+}
+
+function spawnParticles(type,mat,gasType,isFinal){
+  const svg=document.getElementById('vesselWrap');
+  if(!svg) return;
+  const pContainer=svg.querySelector('#particles');
+  if(!pContainer) return;
+
+  const isBeaker=EXPS[curExp].vessel==='beaker';
+  const cx=isBeaker?100:65;const maxY=isBeaker?270:300;
+
+  const count=isFinal?8:3;
+  const isExo=type==='exo';
+
+  for(let i=0;i<count;i++){
+    setTimeout(()=>{
+      const p=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      const x=cx+(Math.random()-0.5)*40;const y=maxY-5;
+      const r=isExo?2+Math.random()*3:1.5+Math.random()*2.5;
+      const dur=0.8+Math.random()*0.8;
+      const col=isExo?`rgba(251,146,60,${0.5+Math.random()*0.4})`:`rgba(147,197,253,${0.5+Math.random()*0.4})`;
+      p.setAttribute('cx',x);p.setAttribute('cy',y);p.setAttribute('r',r);p.setAttribute('fill',col);
+      p.style.animation=`particleRise ${dur}s ease-in forwards`;
+      pContainer.appendChild(p);
+      setTimeout(()=>p.remove(),(dur+0.1)*1000);
+    },i*100);
+  }
+
+  if(isFinal&&gasType){
+    // Extra gas label
+    const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+    txt.setAttribute('x',cx);txt.setAttribute('y',isBeaker?30:20);
+    txt.setAttribute('text-anchor','middle');txt.setAttribute('font-size','10');
+    txt.setAttribute('fill',isExo?'#ea580c':'#3b82f6');txt.setAttribute('font-family','JetBrains Mono');
+    txt.setAttribute('opacity','0');txt.textContent=gasType+'↑';
+    pContainer.appendChild(txt);
+    setTimeout(()=>{txt.style.transition='opacity .5s';txt.setAttribute('opacity','1');},800);
+    setTimeout(()=>{txt.style.transition='opacity 1s';txt.setAttribute('opacity','0');},3000);
+    setTimeout(()=>txt.remove(),4000);
+  }
+}
+
+function triggerReaction(exp){
+  const isExo=exp.type==='exo';
+  if(isExo) SFX.sizzle(); else SFX.bubble(6);
+
+  // Animate temperature
+  const tempVal=document.getElementById('tempVal');
+  const deltaSpan=document.getElementById('deltaTSpan');
+  const tempBar=document.getElementById('tempBar');
+  let curTemp=exp.tempStart;const targetTemp=exp.tempEnd;const steps=20;
+  const diff=(targetTemp-curTemp)/steps;
+  let step=0;
+  const ti=setInterval(()=>{
+    curTemp+=diff;step++;
+    if(tempVal){tempVal.textContent=Math.round(curTemp)+'°C';tempVal.className='temp-val '+(isExo?'temp-hot':'temp-cold');}
+    if(deltaSpan){deltaSpan.textContent=exp.deltaT;}
+    // Bar 0–100%, 50%=27°C. Exo goes right, endo goes left
+    const pct=isExo?50+(step/steps)*45:50-(step/steps)*40;
+    if(tempBar){tempBar.style.width=pct+'%';tempBar.style.background=isExo?'var(--exo)':'var(--endo)';}
+    if(step>=steps){clearInterval(ti);showReactionResult(exp,isExo);}
+  },50);
+
+  // Status
+  const status=document.getElementById('riStatus');
+  if(status){status.className='ri-status running';status.innerHTML=`${isExo?'🔥':'❄️'} Reaksi berlangsung… Memantau perubahan suhu…`;}
+}
+
+function showReactionResult(exp,isExo){
+  const status=document.getElementById('riStatus');
+  if(status){
+    status.className=isExo?'ri-status complete-exo':'ri-status complete-endo';
+    status.innerHTML=`${isExo?'🔥 REAKSI EKSOTERMIK!':'❄️ REAKSI ENDOTERMIK!'} Suhu ${isExo?'naik':'turun'} ${exp.deltaT}`;
+  }
+  const result=document.getElementById('reactionResult');
+  if(result)result.style.display='block';
+  const obs=document.getElementById('riObs');if(obs)obs.textContent=exp.obs;
+  const formula=document.getElementById('riFormula');if(formula)formula.textContent=exp.reaction;
+  const badges=document.getElementById('riBadges');
+  if(badges)badges.innerHTML=`
+    <span class="ri-badge ${exp.type}">${isExo?'🔥 Eksotermik':'❄️ Endotermik'}</span>
+    <span class="ri-badge pos">ΔH ${isExo?'< 0 (negatif)':'> 0 (positif)'}</span>
+    <span class="ri-badge ${exp.type}">T ${isExo?'naik':'turun'} ${exp.deltaT}</span>
+  `;
+
+  // Spawn more particles
+  const svg=document.getElementById('vesselWrap');
+  if(svg){
+    for(let i=0;i<15;i++){
+      setTimeout(()=>spawnParticles(exp.type,null,null,false),i*80);
+    }
+  }
+
+  // Show celebration for first completion
+  const emoji=isExo?'🔥':'❄️';
+  const resultLabel=isExo?'Reaksi Eksotermik!':'Reaksi Endotermik!';
+  showCeleb(emoji,resultLabel,`<strong>${exp.title}: ${exp.subtitle}</strong><br>Suhu berubah ${exp.deltaT} — <strong>${isExo?'Kalor dilepaskan ke lingkungan':'Kalor diserap dari lingkungan'}</strong><br><br>ΔH ${isExo?'< 0 (Negatif)':'> 0 (Positif)'}`);
+  showToast(`${emoji} ${isExo?'Eksotermik':'Endotermik'} · Suhu ${exp.deltaT}`,exp.type);
+}
+
+function resetExp(){
+  droppedMats.clear();clearAnimations();renderSim();SFX.click();
+}
+
+// ============ DISKUSI ============
+function saveDiscussion(){
+  SFX.success();
+  showToast('💾 Jawaban tersimpan! Selamat belajar! 🎉','');
+}
+
+// ============ INIT ============
+document.addEventListener('DOMContentLoaded',()=>{
+  loadExp(1,document.querySelector('.sim-etab'));
+});
+</script>
+</body>
+</html>
